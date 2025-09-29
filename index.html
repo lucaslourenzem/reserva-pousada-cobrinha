@@ -41,12 +41,12 @@
         <img src="logo.png" alt="Pousada do Cobrinha" />
         <div>
           <h1>Seja Bem‑Vindo Pescador!</h1>
-          <div class="subtitle">Preencha sua simulação de reserva. Nosso sistema verifica disponibilidade e calcula o orçamento.</div>
+          <div class="subtitle">Preencha sua simulação de reserva. Faça um orçamento e converse conosco!</div>
         </div>
       </header>
 
       <div class="notice">
-        <span class="pill">Dica</span> Este arquivo pode ser hospedado no GitHub Pages. No código, ajuste <code>WEBHOOK_URL</code> e <code>CHECK_AVAIL_URL</code> para integrar ao n8n. <b>Acomodação</b> agora é definida <i>no back‑end</i> conforme disponibilidade (Casa, 3 Apartamentos e 2 Suítes em combinação). Em <b>Camping</b>, o preço é unitário por pessoa.
+        <span class="pill">UM DIA NA AREIA BRANCA</span> 
       </div>
 
       <form id="bookingForm">
@@ -172,10 +172,10 @@
 
 
     window.addEventListener('DOMContentLoaded',()=>{
-    $$('#check_in').value = addDays(todayISO(), 10);
-    $$('#check_out').value = addDays(todayISO(), 14);
-    $$('#email').value = 'lucas@example.com';
-    document.getElementById('year').textContent = new Date().getFullYear();
+      $$('#check_in').value = addDays(todayISO(), 10);
+      $$('#check_out').value = addDays(todayISO(), 14);
+      $$('#email').value = 'lucas@example.com';
+      document.getElementById('year').textContent = new Date().getFullYear();
     });
 
 
@@ -196,7 +196,7 @@
     }
     function baseRate(estadia, plano){
       if(estadia === 'Camping') return 80; // por pessoa/dia (adultos e crianças)
-      const map = { 'Cafe':250, 'Cafe_Almoco':300, 'Completo':350, 'Sem':250 };
+      const map = { 'Cafe':250, 'Cafe_Almoco':300, 'Completo':350, 'Sem':230 };
       return map[plano] ?? 250;
     }
 
@@ -229,7 +229,7 @@
 
       const totalAlloc = peopleAllocation(adultos, criancas);
       if(estadia==='Quarto' && totalAlloc>28){
-      throw new Error('Para grupos acima de 28 pessoas em Quarto, entre em contato por WhatsApp/E-mail.');
+        throw new Error('Para grupos acima de 28 pessoas em Quarto, entre em contato por WhatsApp/E-mail.');
       }
 
 
