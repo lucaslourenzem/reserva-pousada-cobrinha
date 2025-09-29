@@ -84,10 +84,12 @@
         <div class="field col-2">
           <label for="hrs_checkin">Horas Chegada</label>
           <input id="hrs_checkin" name="hrs_checkin" type="time" />
+          <span class="hint"><b>A partir das 14:00 horas.</b></span>
         </div>
         <div class="field col-2">
           <label for="hrs_checkout">Horas Saída</label>
           <input id="hrs_checkout" name="hrs_checkout" type="time" />
+          <span class="hint"><b>Até as 10:00 horas.</b></span>
         </div>
 
         <div class="field col-4">
@@ -104,6 +106,7 @@
         <div class="field col-2">
           <label for="criancas">Crianças</label>
           <input id="criancas" name="criancas" type="number" min="0" max="40" value="2" />
+          <span class="hint">6 até 11 anos.</span>
         </div>
 
         <div class="field col-4">
@@ -112,7 +115,6 @@
             <option value="Cafe">Café</option>
             <option value="Cafe_Almoco">Café e Almoço</option>
             <option value="Completo" selected>Completo</option>
-            <option value="Sem">Sem</option>
           </select>
         </div>
         <div class="field col-4">
@@ -124,7 +126,7 @@
           <input id="barcos" name="barcos" type="number" min="0" max="10" value="0" />
         </div>
 
-        <div class="col-12 notice"><b>Acomodação</b> Com base no total de pessoas e na disponibilidade:Entre 1 Casa, 3 Apartamentos e 2 Suítes (capacidade sugerida para Quarto: até 28 pessoas). Grupos maiores → entre em contato conosco.</div>
+        <div class="col-12 notice"><b>Acomodação</b> Com base no total de pessoas e na disponibilidade:Entre 1 Casa (com 2 Suítes), 2 Apartamentos e 3 Suítes (capacidade sugerida: até 28 pessoas). Grupos maiores → entre em contato conosco.</div>
 
         <div class="col-12 btns">
           <button class="btn-secondary" type="button" id="btnAvailability">Verificar Disponibilidade</button>
@@ -196,7 +198,7 @@
     }
     function baseRate(estadia, plano){
       if(estadia === 'Camping') return 80; // por pessoa/dia (adultos e crianças)
-      const map = { 'Cafe':250, 'Cafe_Almoco':300, 'Completo':350, 'Sem':230 };
+      const map = { 'Cafe':250, 'Cafe_Almoco':300, 'Completo':350 };
       return map[plano] ?? 250;
     }
 
