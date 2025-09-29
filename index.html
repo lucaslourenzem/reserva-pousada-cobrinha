@@ -5,68 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Seja Bem‑Vindo Pescador! · Pousada do Cobrinha</title>
   <style>
-    :root{
-      --bg:#f7f2e7;           /* papel antigo */
-      --ink:#2d2a26;          /* tinta */
-      --accent:#1e6f5c;       /* verde pescaria */
-      --accent-2:#b87333;     /* cobre/retro */
-      --wood:#7a5230;         /* madeira */
-      --muted:#6a5f55;
-      --error:#b00020;
-      --ok:#1b5e20;
-    }
-    html,body{background:var(--bg);color:var(--ink);font-family: ui-serif, Georgia, "Times New Roman", Times, serif;}
+    :root{--bg:#f7f2e7;--ink:#2d2a26;--accent:#1e6f5c;--accent-2:#b87333;--wood:#7a5230;--muted:#6a5f55;--error:#b00020;--ok:#1b5e20}
+    html,body{background:var(--bg);color:var(--ink);font-family: ui-serif, Georgia, "Times New Roman", Times, serif}
     .wrap{max-width:980px;margin:24px auto;padding:24px}
-    .card{
-      background:linear-gradient(180deg,#fff8ee,#f7efdf);
-      border:2px solid var(--wood);
-      box-shadow: 0 6px 0 var(--wood), 0 10px 20px rgba(0,0,0,.08);
-      border-radius:18px; padding:24px; position:relative;
-    }
+    .card{background:linear-gradient(180deg,#fff8ee,#f7efdf);border:2px solid var(--wood);box-shadow:0 6px 0 var(--wood),0 10px 20px rgba(0,0,0,.08);border-radius:18px;padding:24px}
     header{display:flex;align-items:center;gap:16px;margin-bottom:16px}
     header img{width:70px;height:70px;object-fit:contain;border-radius:50%;border:2px solid var(--accent-2);background:#fff}
     h1{font-size:clamp(22px,3.8vw,36px);margin:0;color:var(--wood);letter-spacing:.03em}
     .subtitle{color:var(--muted);margin-top:4px}
-
-    form{display:grid;grid-template-columns: repeat(12, 1fr);gap:14px;margin-top:14px}
+    form{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-top:14px}
     .field{display:flex;flex-direction:column;gap:6px}
-    .field label{font-weight:700;color:var(--wood);}
-    .field input, .field select, .field textarea{
-      padding:10px 12px;border:2px solid var(--wood);border-radius:12px;background:#fff;
-      font-size:15px;outline:none;transition: box-shadow .15s ease, border-color .15s ease;
-    }
-    .field input:focus, .field select:focus, .field textarea:focus{box-shadow:0 0 0 4px rgba(184,115,51,.22);border-color:var(--accent-2)}
-    .col-6{grid-column: span 6}
-    .col-4{grid-column: span 4}
-    .col-3{grid-column: span 3}
-    .col-8{grid-column: span 8}
-    .col-12{grid-column: 1 / -1}
-
-    .row{display:grid;grid-template-columns: repeat(12, 1fr);gap:14px}
+    .field label{font-weight:700;color:var(--wood)}
+    .field input,.field select,.field textarea{padding:10px 12px;border:2px solid var(--wood);border-radius:12px;background:#fff;font-size:15px;outline:none;transition:box-shadow .15s ease,border-color .15s ease}
+    .field input:focus,.field select:focus,.field textarea:focus{box-shadow:0 0 0 4px rgba(184,115,51,.22);border-color:var(--accent-2)}
+    .col-6{grid-column:span 6}.col-4{grid-column:span 4}.col-3{grid-column:span 3}.col-2{grid-column:span 2}.col-12{grid-column:1/-1}
     .hint{font-size:12px;color:var(--muted)}
     .pill{display:inline-block;padding:6px 10px;border:2px dashed var(--accent-2);border-radius:999px;color:var(--accent-2);background:#fff8f0;font-weight:700}
-
     .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
     button{cursor:pointer;border:none;border-radius:12px;padding:12px 16px;font-weight:800;letter-spacing:.02em}
-    .btn-primary{background:var(--accent);color:#fff}
-    .btn-secondary{background:var(--accent-2);color:#fff}
-    .btn-outline{background:#fff;border:2px solid var(--wood);color:var(--wood)}
-
-    .tag{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 10px;font-size:12px;border:1px solid #d6c7b7;color:#5b4f45;background:#fff}
-    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-
+    .btn-primary{background:var(--accent);color:#fff}.btn-secondary{background:var(--accent-2);color:#fff}.btn-outline{background:#fff;border:2px solid var(--wood);color:var(--wood)}
     .notice{border-left:6px solid var(--accent-2);background:#fff7ef;padding:12px;border-radius:12px}
-    .error{color:var(--error)}
-    .ok{color:var(--ok)}
-
+    .error{color:var(--error)}.ok{color:var(--ok)}
     .totals{background:#fff;border:2px solid var(--wood);border-radius:16px;padding:14px}
     .totals h3{margin-top:0}
-    .totals dl{display:grid;grid-template-columns:1fr auto;gap:8px;font-variant-numeric: tabular-nums}
-    .totals dt{color:var(--muted)}
-    .totals dd{margin:0;font-weight:800}
-
+    .totals dl{display:grid;grid-template-columns:1fr auto;gap:8px;font-variant-numeric:tabular-nums}
+    .totals dt{color:var(--muted)}.totals dd{margin:0;font-weight:800}
     footer{margin-top:18px;color:var(--muted);font-size:12px}
-    @media (max-width:780px){.col-6,.col-4,.col-3,.col-8{grid-column:1/-1}}
+    @media(max-width:780px){.col-6,.col-4,.col-3,.col-2{grid-column:1/-1}}
   </style>
 </head>
 <body>
@@ -81,7 +46,7 @@
       </header>
 
       <div class="notice">
-        <span class="pill">Dica</span> Você pode salvar este arquivo como <b>reserva_pousada_cobrinha.html</b> e abrir no navegador. Coloque o logo como <b>logo.png</b> na mesma pasta. Configure as variáveis <code>WEBHOOK_URL</code> e <code>CHECK_AVAIL_URL</code> no código para integrar ao n8n.
+        <span class="pill">Dica</span> Este arquivo pode ser hospedado no GitHub Pages. No código, ajuste <code>WEBHOOK_URL</code> e <code>CHECK_AVAIL_URL</code> para integrar ao n8n. <b>Acomodação</b> agora é definida <i>no back‑end</i> conforme disponibilidade (Casa, 3 Apartamentos e 2 Suítes em combinação). Em <b>Camping</b>, o preço é unitário por pessoa.
       </div>
 
       <form id="bookingForm">
@@ -132,23 +97,13 @@
             <option value="Camping">Camping</option>
           </select>
         </div>
-        <div class="field col-4">
-          <label for="acomodacao">Acomodação</label>
-          <select id="acomodacao" name="acomodacao" required>
-            <option value="Casa">Casa (4–8)</option>
-            <option value="Apartamento">Apartamento (2–4)</option>
-            <option value="Suite">Suíte (2–4)</option>
-            <option value="Camping">Camping (2–20)</option>
-          </select>
-          <span class="hint">Sugestão automática com base no nº de pessoas.</span>
-        </div>
         <div class="field col-2">
           <label for="adultos">Adultos</label>
-          <input id="adultos" name="adultos" type="number" min="1" max="20" value="4" required />
+          <input id="adultos" name="adultos" type="number" min="1" max="40" value="4" required />
         </div>
         <div class="field col-2">
           <label for="criancas">Crianças</label>
-          <input id="criancas" name="criancas" type="number" min="0" max="20" value="2" />
+          <input id="criancas" name="criancas" type="number" min="0" max="40" value="2" />
         </div>
 
         <div class="field col-4">
@@ -162,21 +117,20 @@
         </div>
         <div class="field col-4">
           <label for="dias_pesca">Dias de Pesca</label>
-          <input id="dias_pesca" name="dias_pesca" type="number" min="0" max="30" value="1" />
+          <input id="dias_pesca" name="dias_pesca" type="number" min="0" max="30" value="0" />
         </div>
         <div class="field col-4">
-          <label for="pirangueiro">Pirangueiro(s)</label>
-          <input id="pirangueiro" name="pirangueiro" type="number" min="0" max="10" value="1" />
+          <label for="barcos">Nº de barcos</label>
+          <input id="barcos" name="barcos" type="number" min="0" max="10" value="0" />
         </div>
 
-        <div class="field col-12">
-          <div class="btns">
-            <button class="btn-outline" type="button" id="btnSuggest">Sugerir Acomodação</button>
-            <button class="btn-secondary" type="button" id="btnAvailability">Verificar Disponibilidade</button>
-            <button class="btn-primary" type="button" id="btnQuote">Calcular Orçamento</button>
-          </div>
-          <div id="availabilityMsg" class="hint" style="margin-top:6px"></div>
+        <div class="col-12 notice"><b>Acomodação</b> é calculada pelo <i>back‑end</i> com base no total de pessoas e na disponibilidade: combinação entre 1 Casa, 3 Apartamentos e 2 Suítes (capacidade sugerida para Quarto: até 28 pessoas). Grupos maiores → entre em contato.</div>
+
+        <div class="col-12 btns">
+          <button class="btn-secondary" type="button" id="btnAvailability">Verificar Disponibilidade</button>
+          <button class="btn-primary" type="button" id="btnQuote">Calcular Orçamento</button>
         </div>
+        <div id="availabilityMsg" class="hint" style="margin-top:6px"></div>
 
         <div class="col-12 totals" id="totalsBox" hidden>
           <h3>Resumo do Orçamento</h3>
@@ -185,21 +139,19 @@
             <dt>Pessoas (alocação)</dt><dd id="t_pessoas">0</dd>
             <dt>Base diária</dt><dd id="t_diaria">R$ 0,00</dd>
             <dt>Subtotal hospedagem</dt><dd id="t_subtotal">R$ 0,00</dd>
-            <dt>Pescaria</dt><dd id="t_pescaria">R$ 0,00</dd>
+            <dt>Pescaria (barcos×dias)</dt><dd id="t_pescaria">R$ 0,00</dd>
             <dt><b>Total estimado</b></dt><dd id="t_total"><b>R$ 0,00</b></dd>
           </dl>
-          <div class="hint">* Crianças contam como 0,5 apenas para <em>valor</em>, não para <em>alocação</em>.</div>
+          <div class="hint">* Em <b>Quarto</b>, crianças contam como 0,5 no <em>valor</em>. Em <b>Camping</b>, contam como 1.</div>
         </div>
 
         <div class="col-12 btns">
           <button class="btn-primary" type="submit">Enviar Reserva</button>
-          <span class="tag">Status inicial: <b>Não</b> (confirmação após depósito de 50%)</span>
+          <span class="hint">Status inicial enviado como <b>Não</b>; confirmação após depósito de 50%.</span>
         </div>
       </form>
 
-      <footer>
-        © <span id="year"></span> Pousada do Cobrinha · Layout retrô com alma de pescador 🎣
-      </footer>
+      <footer>© <span id="year"></span> Pousada do Cobrinha · Layout retrô com alma de pescador 🎣</footer>
     </div>
   </div>
 
@@ -208,7 +160,7 @@
     // CONFIGURAÇÃO n8n
     // ======================
     const WEBHOOK_URL     = "https://n8n.srv1028851.hstgr.cloud/webhook-test/make-booking"; // produção
-    const CHECK_AVAIL_URL = "https://n8n.srv1028851.hstgr.cloud/webhook/check-availability"; // implemente no n8n
+    const CHECK_AVAIL_URL = "https://n8n.srv1028851.hstgr.cloud/webhook/make-booking"; // implemente no n8n
 
     // ======================
     // UTILITÁRIOS
@@ -218,14 +170,14 @@
     const todayISO = () => new Date().toISOString().slice(0,10);
     const addDays = (d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)};
 
-    // datas padrão (exemplo do enunciado)
+
     window.addEventListener('DOMContentLoaded',()=>{
-      $$('#check_in').value = addDays(todayISO(), 10);
-      $$('#check_out').value = addDays(todayISO(), 14);
-      $$('#nome').value = '';
-      $$('#email').value = 'lucas@example.com';
-      document.getElementById('year').textContent = new Date().getFullYear();
+    $$('#check_in').value = addDays(todayISO(), 10);
+    $$('#check_out').value = addDays(todayISO(), 14);
+    $$('#email').value = 'lucas@example.com';
+    document.getElementById('year').textContent = new Date().getFullYear();
     });
+
 
     function nights(ci, co){
       const a = new Date(ci); const b = new Date(co);
@@ -233,77 +185,62 @@
       return Math.max(0, Math.round(diff));
     }
 
-    function peopleAllocation(adultos, criancas){
-      return Number(adultos||0) + Number(criancas||0); // crianças inteiras para ALOCAÇÃO
-    }
-    function peopleBilling(adultos, criancas){
-      return Number(adultos||0) + 0.5*Number(criancas||0); // crianças = 0.5 para VALOR
-    }
 
+    function peopleAllocation(adultos, criancas){
+      return Number(adultos||0) + Number(criancas||0); // alocação
+    }
+    function peopleBilling(adultos, criancas, estadia){
+      // valor: quarto (criança=0.5), camping (criança=1)
+      if(estadia === 'Camping') return Number(adultos||0) + Number(criancas||0);
+      return Number(adultos||0) + 0.5*Number(criancas||0);
+    }
     function baseRate(estadia, plano){
-      if(estadia === 'Camping') return 80; // por pessoa/dia
-      // Quarto
+      if(estadia === 'Camping') return 80; // por pessoa/dia (adultos e crianças)
       const map = { 'Cafe':250, 'Cafe_Almoco':300, 'Completo':350, 'Sem':250 };
       return map[plano] ?? 250;
     }
 
-    function suggestAccommodation(){
-      const total = peopleAllocation($$('#adultos').value, $$('#criancas').value);
-      const estadia = $$('#estadia').value;
-      if(estadia === 'Camping'){ $$('#acomodacao').value = 'Camping'; return 'Camping'; }
-      // heurística simples
-      if(total >= 5 && total <= 8){ $$('#acomodacao').value = 'Casa'; return 'Casa'; }
-      if(total >= 2 && total <= 4){ $$('#acomodacao').value = 'Apartamento'; return 'Apartamento'; }
-      if(total > 8){ $$('#acomodacao').value = 'Casa'; return 'Casa'; }
-      // fallback
-      $$('#acomodacao').value = 'Suite'; return 'Suite';
-    }
 
     async function checkAvailability(){
       const payload = collectForm();
       setAvailability('Verificando disponibilidade…');
       try{
         if(CHECK_AVAIL_URL.startsWith('https://SEU_HOST')){
-          // Simulação local enquanto a API não está pronta
           await new Promise(r=>setTimeout(r,600));
-          setAvailability('Exemplo: disponibilidade OK (configure CHECK_AVAIL_URL no n8n).', 'ok');
+          setAvailability('Exemplo: disponibilidade OK (configure CHECK_AVAIL_URL no n8n).','ok');
           return { available:true };
         }
         const res = await fetch(CHECK_AVAIL_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
         const data = await res.json();
         setAvailability(data.available? 'Disponível ✅':'Indisponível ❌', data.available?'ok':'error');
         return data;
-      }catch(err){
-        console.error(err);
-        setAvailability('Erro ao verificar disponibilidade.', 'error');
-        return { available:false, error: String(err) };
-      }
+      }catch(err){ setAvailability('Erro ao verificar disponibilidade.','error'); return {available:false,error:String(err)} }
     }
-
-    function setAvailability(msg, type){
-      const el = $$('#availabilityMsg');
-      el.textContent = msg;
-      el.classList.remove('error','ok');
-      if(type==='ok') el.classList.add('ok');
-      if(type==='error') el.classList.add('error');
-    }
+    function setAvailability(msg,type){ const el=$$('#availabilityMsg'); el.textContent=msg; el.classList.remove('error','ok'); if(type==='ok')el.classList.add('ok'); if(type==='error')el.classList.add('error'); }
 
     function calcQuote(){
       const ci = $$('#check_in').value; const co = $$('#check_out').value;
-      const n = nights(ci,co);
-      if(n<=0) throw new Error('Datas inválidas: check-out deve ser após o check-in.');
+      const n = nights(ci,co); if(n<=0) throw new Error('Datas inválidas: check-out deve ser após o check-in.');
       const adultos = Number($$('#adultos').value||0);
       const criancas = Number($$('#criancas').value||0);
       const estadia = $$('#estadia').value;
       const plano = $$('#plano_refeicao').value;
-      const ppAlloc = peopleAllocation(adultos, criancas);
-      const ppBill  = peopleBilling(adultos, criancas);
+
+
+      const totalAlloc = peopleAllocation(adultos, criancas);
+      if(estadia==='Quarto' && totalAlloc>28){
+      throw new Error('Para grupos acima de 28 pessoas em Quarto, entre em contato por WhatsApp/E-mail.');
+      }
+
+
+      const ppBill = peopleBilling(adultos, criancas, estadia);
       const diaria = baseRate(estadia, plano);
       const subtotal = diaria * ppBill * n;
-      const pesca = 450 * Number($$('#dias_pesca').value||0) * Number($$('#pirangueiro').value||0);
+      const pesca = 450 * Number($$('#dias_pesca').value||0) * Number($$('#barcos').value||0);
       const total = subtotal + pesca;
-      return { noites:n, pessoas:ppAlloc, diaria, subtotal, pesca, total };
+      return { noites:n, pessoas:totalAlloc, diaria, subtotal, pesca, total };
     }
+
 
     function showTotals(t){
       $$('#t_noites').textContent = t.noites;
@@ -315,61 +252,37 @@
       $$('#totalsBox').hidden = false;
     }
 
+
     function collectForm(){
       const f = document.getElementById('bookingForm');
       const o = Object.fromEntries(new FormData(f).entries());
-      // coerção numérica
-      ['adultos','criancas','dias_pesca','pirangueiro'].forEach(k=>o[k]=Number(o[k]||0));
-      // validação básica
+      ['adultos','criancas','dias_pesca','barcos'].forEach(k=>o[k]=Number(o[k]||0));
       if(o.contato==='Email' && !o.email) throw new Error('E-mail é obrigatório quando a forma de contato é E-mail.');
       if(o.contato==='WhatsApp' && !o.telefone) throw new Error('Telefone é obrigatório quando a forma de contato é WhatsApp.');
       if(new Date(o.check_out) <= new Date(o.check_in)) throw new Error('Check-out deve ser após o check-in.');
-      // capacidade por acomodação
-      const cap = { Casa:[4,8], Apartamento:[2,4], Suite:[2,4], Camping:[2,20] };
       const total = peopleAllocation(o.adultos,o.criancas);
-      const lim = cap[o.acomodacao];
-      if(lim && (total < lim[0] || total > lim[1])){
-        throw new Error(`Capacidade de ${o.acomodacao}: ${lim[0]}–${lim[1]} pessoas (para alocação).`);
-      }
-      // status inicial
-      o.status = 'Nao';
-      return o;
+      if(o.estadia==='Quarto' && total>28){ throw new Error('Para grupos acima de 28 pessoas em Quarto, contate a pousada.'); }
+      o.status = 'Nao'; // status inicial
+      return o; // sem "acomodacao" — backend decide
     }
 
-    // Botões
-    document.getElementById('btnSuggest').addEventListener('click', ()=>{
-      const s = suggestAccommodation();
-      setAvailability(`Sugestão de acomodação: ${s}`);
-    });
 
     document.getElementById('btnAvailability').addEventListener('click', checkAvailability);
+    document.getElementById('btnQuote').addEventListener('click', ()=>{ try{ showTotals(calcQuote()); setAvailability(''); } catch(e){ alert(e.message); }});
 
-    document.getElementById('btnQuote').addEventListener('click', ()=>{
-      try{ const q = calcQuote(); showTotals(q); setAvailability(''); }
-      catch(e){ alert(e.message); }
-    });
 
-    // Submit → enviar para n8n
     document.getElementById('bookingForm').addEventListener('submit', async (e)=>{
       e.preventDefault();
       try{
         const payload = collectForm();
         const quote = calcQuote();
-        const body = { ...payload, ...{ valor_estimado: quote.total, noites: quote.noites } };
-        if(WEBHOOK_URL.startsWith('https://SEU_HOST')){
-          alert('Configure WEBHOOK_URL para enviar ao n8n. Simulação concluída.');
-          return;
-        }
+        const body = { ...payload, valor_estimado: quote.total, noites: quote.noites };
+        if(WEBHOOK_URL.startsWith('https://SEU_HOST')){ alert('Configure WEBHOOK_URL para enviar ao n8n.'); return; }
         const res = await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
         const data = await res.json().catch(()=>({}));
-        if(res.ok){
-          alert('Reserva enviada com sucesso!\nProtocolo: ' + (data.reserva_id || '—'));
-        } else {
-          alert('Falha ao enviar: ' + (data.error || res.statusText));
-        }
-      }catch(err){
-        alert(err.message);
-      }
+        if(res.ok){ alert('Reserva enviada! Protocolo: ' + (data.reserva_id || '—')); }
+        else { alert('Falha ao enviar: ' + (data.error || res.statusText)); }
+      }catch(err){ alert(err.message); }
     });
   </script>
 </body>
