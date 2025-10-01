@@ -207,7 +207,7 @@
       const payload = collectForm();
       setAvailability('Verificando disponibilidade…');
       try{
-        if(CHECK_AVAIL_URL.startsWith('https://SEU_HOST')){
+        if(CHECK_AVAIL_URL.startsWith('https://lucaslourenzem.github.io/reserva-pousada-cobrinha/')){
           await new Promise(r=>setTimeout(r,600));
           setAvailability('Exemplo: disponibilidade OK (configure CHECK_AVAIL_URL no n8n).','ok');
           return { available:true };
@@ -278,13 +278,33 @@
       try{
         const payload = collectForm();
         const quote = calcQuote();
-        const body = { ...payload, valor_estimado: quote.total, noites: quote.noites };
-        if(WEBHOOK_URL.startsWith('https://SEU_HOST')){ alert('Configure WEBHOOK_URL para enviar ao n8n.'); return; }
-        const res = await fetch(WEBHOOK_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+        const body = { ...payload, ...{ valor_estimado: quote.total, noites: quote.noites } };
+        if(WEBHOOK_URL.startsWith('https://SEU_HOST')){
+          alert('Configure WEBHOOK_URL para enviar ao n8n. Simulação concluída.');
+          return;
+        }
+
+        const res = await fetch(WEBHOOK_URL,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify(body)
+        });
+
+        // ⚠️ Tratamento especial para erro 409 (conflito de reserva)
+        if(res.status === 409){
+          const proceed = confirm('Está cheio para o período selecionado. Deseja continuar mesmo assim?');
+          if(!proceed) return; // usuário cancelou
+        }
+
         const data = await res.json().catch(()=>({}));
-        if(res.ok){ alert('Reserva enviada! Protocolo: ' + (data.reserva_id || '—')); }
-        else { alert('Falha ao enviar: ' + (data.error || res.statusText)); }
-      }catch(err){ alert(err.message); }
+        if(res.ok){
+          alert('Reserva enviada com sucesso!\nProtocolo: ' + (data.reserva_id || '—'));
+        } else {
+          alert('Falha ao enviar: ' + (data.error || res.statusText));
+        }
+      }catch(err){
+        alert(err.message);
+      }
     });
   </script>
 </body>
