@@ -166,8 +166,8 @@
     // ======================
     // CONFIGURAÇÃO n8n
     // ======================
-    const WEBHOOK_URL     = "https://n8n.srv1028851.hstgr.cloud/webhook/make-booking"; // produção
-    const CHECK_AVAIL_URL = "https://n8n.srv1028851.hstgr.cloud/webhook/make-booking";      // verificação leve (mesmo endpoint — retorna 409 se cheio)
+    const WEBHOOK_URL     = "https://n8n.srv1028851.hstgr.cloud/webhook/make-booking";
+    const CHECK_AVAIL_URL = "https://n8n.srv1028851.hstgr.cloud/webhook/make-booking";
 
     // ======================
     // UTILITÁRIOS
@@ -177,125 +177,181 @@
     const todayISO = () => new Date().toISOString().slice(0,10);
     const addDays  = (d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)};
 
-    // campos
+    // refs de campos
     const el = {
-        estadia:      null,
-        plano:        null,
-        dias_pesca:   null,
-        barcos:       null,
-        adultos:      null,
-        criancas:     null,
-        check_in:     null,
-        check_out:    null,
-        totalsBox:    null,
+      contato:     null,
+      email:       null,
+      telefone:    null,
+      estadia:     null,
+      plano:       null,
+      dias_pesca:  null,
+      barcos:      null,
+      adultos:     null,
+      criancas:    null,
+      check_in:    null,
+      check_out:   null,
+      totalsBox:   null,
     };
 
+    // debounce para pré-checagem
+    let preblockTimer;
+    function schedulePreblock(){
+      clearTimeout(preblockTimer);
+      preblockTimer = setTimeout(preblockCalendar, 300);
+    }
+
     window.addEventListener('DOMContentLoaded', ()=>{
-        el.estadia    = $$('#estadia');
-        el.plano      = $$('#plano_refeicao');
-        el.dias_pesca = $$('#dias_pesca');
-        el.barcos     = $$('#barcos');
-        el.adultos    = $$('#adultos');
-        el.criancas   = $$('#criancas');
-        el.check_in   = $$('#check_in');
-        el.check_out  = $$('#check_out');
-        el.totalsBox  = $$('#totalsBox');
+      // bind
+      el.contato    = $$('#contato');
+      el.email      = $$('#email');
+      el.telefone   = $$('#telefone');
+      el.estadia    = $$('#estadia');
+      el.plano      = $$('#plano_refeicao');
+      el.dias_pesca = $$('#dias_pesca');
+      el.barcos     = $$('#barcos');
+      el.adultos    = $$('#adultos');
+      el.criancas   = $$('#criancas');
+      el.check_in   = $$('#check_in');
+      el.check_out  = $$('#check_out');
+      el.totalsBox  = $$('#totalsBox');
 
-        // defaults
-        el.check_in.value  = addDays(todayISO(), 10);
-        el.check_out.value = addDays(todayISO(), 14);
-        $$('#email').value = 'lucas@example.com';
-        document.getElementById('year').textContent = new Date().getFullYear();
+      // defaults
+      el.check_in.value  = addDays(todayISO(), 10);
+      el.check_out.value = addDays(todayISO(), 14);
+      $$('#email').value = 'lucas@example.com';
+      document.getElementById('year').textContent = new Date().getFullYear();
 
-        applyVisibilityRules();
-        [el.estadia, el.dias_pesca].forEach(n=>n.addEventListener('change', applyVisibilityRules));
-        [el.adultos, el.criancas, el.check_in, el.check_out, el.estadia].forEach(n=>n.addEventListener('change', preblockCalendar));
+      // limites de data + vínculo de min
+      el.check_in.min = todayISO();
+      el.check_out.min = el.check_in.value;
+      el.check_in.addEventListener('change', ()=>{
+        el.check_out.min = el.check_in.value;
+        schedulePreblock();
+      });
+
+      // visibilidade e required dinâmicos
+      applyVisibilityRules();
+      applyContatoRequired();
+
+      [el.estadia, el.dias_pesca].forEach(n=>n.addEventListener('change', applyVisibilityRules));
+      [el.adultos, el.criancas, el.check_in, el.check_out, el.estadia].forEach(n=>n.addEventListener('change', schedulePreblock));
+      [el.check_out].forEach(n=>n.addEventListener('change', schedulePreblock));
+      el.contato.addEventListener('change', applyContatoRequired);
+
+      // Botão orçamento
+      document.getElementById('btnQuote').addEventListener('click', ()=>{
+        try{ showTotals(calcQuote()); } catch(e){ alert(e.message); }
+      });
+
+      // Submit
+      document.getElementById('bookingForm').addEventListener('submit', onSubmit);
     });
-    
+
+    // regras de exibição (plano só em Quarto; barcos só se dias_pesca>0)
+    function applyVisibilityRules(){
+      const isQuarto = el.estadia.value === 'Quarto';
+      const pescaOn  = Number(el.dias_pesca.value||0) > 0;
+      toggleField('#plano_refeicao', isQuarto);
+      toggleField('#barcos', pescaOn);
+    }
+
+    // required dinâmico conforme Forma de Contato
+    function applyContatoRequired(){
+      const byEmail = el.contato.value === 'Email';
+      const byZap   = el.contato.value === 'WhatsApp';
+      // email required se contato = Email
+      el.email.toggleAttribute('required', byEmail);
+      // telefone required se contato = WhatsApp
+      el.telefone.toggleAttribute('required', byZap);
+    }
+
+    // mostra/oculta + preserva/limpa required corretamente
+    function toggleField(selector, show){
+      const field = document.querySelector(selector)?.closest('.field');
+      if(!field) return;
+      const inputs = field.querySelectorAll('input,select,textarea');
+
+      if(show){
+        field.style.display = '';
+        inputs.forEach(inp=>{
+          if(inp.dataset.wasRequired === '1'){
+            inp.setAttribute('required','required');
+          }
+        });
+      } else {
+        field.style.display = 'none';
+        inputs.forEach(inp=>{
+          // guarda e remove required
+          inp.dataset.wasRequired = inp.hasAttribute('required') ? '1' : '';
+          inp.removeAttribute('required');
+          // limpa valor
+          if(inp.tagName==='SELECT') inp.selectedIndex = 0;
+          else inp.value = (inp.type==='number' ? 0 : '');
+        });
+      }
+    }
+
     function nights(ci, co){
-        const a = new Date(ci); const b = new Date(co);
-        const diff = Math.round((b - a) / (1000*60*60*24));
-        // regra especial: mesmo dia = 2 diárias
-        return diff <= 0 ? 2 : diff;
+      const a = new Date(ci); const b = new Date(co);
+      const diff = Math.round((b - a) / (1000*60*60*24));
+      // mesmo dia = 2 diárias
+      return diff <= 0 ? 2 : diff;
     }
 
     function sameDay(ci, co){
-        const a = new Date(ci); const b = new Date(co);
-        return a.toDateString() === b.toDateString();
+      const a = new Date(ci); const b = new Date(co);
+      return a.toDateString() === b.toDateString();
     }
 
     function peopleAllocation(adultos, criancas){
-        return Number(adultos||0) + Number(criancas||0);
+      return Number(adultos||0) + Number(criancas||0);
     }
     function peopleBilling(adultos, criancas, estadia){
-        // valor: quarto (criança=0.5), camping (criança=1)
-        if(estadia === 'Camping') return Number(adultos||0) + Number(criancas||0);
-        return Number(adultos||0) + 0.5*Number(criancas||0);
+      if(estadia === 'Camping') return Number(adultos||0) + Number(criancas||0);
+      return Number(adultos||0) + 0.5*Number(criancas||0);
     }
     function baseRate(estadia, plano){
-        if(estadia === 'Camping') return 80; // por pessoa/dia (adultos e crianças)
-        const map = { 'Cafe':250, 'Cafe_Almoco':300, 'Completo':350 };
-        return map[plano] ?? 250;
+      if(estadia === 'Camping') return 80;
+      const map = { 'Cafe':250, 'Cafe_Almoco':300, 'Completo':350 };
+      return map[plano] ?? 250;
     }
 
-    // Mostra/oculta campos conforme lógica de negócio
-    function applyVisibilityRules(){
-        const isQuarto   = el.estadia.value === 'Quarto';
-        const pescaOn    = Number(el.dias_pesca.value||0) > 0;
-
-        // Plano de Refeição só existe em Quarto
-        toggleField('#plano_refeicao', isQuarto);
-
-        // Barcos aparece só se tiver ao menos 1 dia de pesca
-        toggleField('#barcos', pescaOn);
-    }
-
-    function toggleField(selector, show){
-        const field = document.querySelector(selector)?.closest('.field');
-        if(!field) return;
-        field.style.display = show ? '' : 'none';
-        // também limpa valor quando oculta
-        if(!show){
-        const inp = field.querySelector('input,select,textarea');
-        if(inp) { if(inp.tagName==='SELECT') inp.selectedIndex=0; else inp.value = (inp.type==='number' ? 0 : ''); }
-        }
-    }
-
-    // Pré-bloqueio do calendário (front): se a data + pessoas não passam no back, marcamos inválido
+    // Pré-bloqueio de calendário (consulta leve ao back)
     async function preblockCalendar(){
-        try{
-        const payload = collectForm({looseDates:true}); // não explode se datas ainda não válidas
-        // Regras simples locais (sem depender do back)
+      try{
+        const payload = collectForm({looseDates:true});
         const total = peopleAllocation(payload.adultos, payload.criancas);
+
         if(payload.estadia==='Camping' && total>25){
-            el.check_in.setCustomValidity('Camping comporta até 25 pessoas. Ajuste o grupo.');
-            el.check_in.reportValidity();
-            return;
+          const msg = 'Camping comporta até 25 pessoas. Ajuste o grupo.';
+          el.check_in.setCustomValidity(msg);
+          el.check_in.reportValidity();
+          return;
         }
 
-        // Consulta leve ao endpoint – o seu próprio back dá o veredito final
         const res = await fetch(CHECK_AVAIL_URL,{
-            method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
+          method:'POST',
+          headers:{'Content-Type':'application/json','Cache-Control':'no-store'},
+          body: JSON.stringify(payload),
+          cache: 'no-store'
         });
 
         if(res.status === 409){
-            // marca a data atual como inválida (usuário precisará mudar)
-            const msg = 'Período indisponível para a quantidade de pessoas selecionada.';
-            el.check_in.setCustomValidity(msg);
-            el.check_out.setCustomValidity(msg);
-            el.check_in.reportValidity();
+          const msg = 'Período indisponível para a quantidade de pessoas selecionada.';
+          el.check_in.setCustomValidity(msg);
+          el.check_out.setCustomValidity(msg);
+          el.check_in.reportValidity();
         } else {
-            el.check_in.setCustomValidity('');
-            el.check_out.setCustomValidity('');
+          el.check_in.setCustomValidity('');
+          el.check_out.setCustomValidity('');
         }
-        } catch(e){
-        // não trava o usuário por erro transitório
+      }catch{
         el.check_in.setCustomValidity('');
         el.check_out.setCustomValidity('');
-        }
+      }
     }
-    function generateReqId() {
-      // UUID v4-like
+
+    function generateReqId(){
       const b = new Uint8Array(16);
       crypto.getRandomValues(b);
       b[6] = (b[6] & 0x0f) | 0x40; // version
@@ -303,110 +359,97 @@
       const hex = [...b].map(x=>x.toString(16).padStart(2,'0'));
       return `${hex.slice(0,4).join('')}-${hex.slice(4,6).join('')}-${hex.slice(6,8).join('')}-${hex.slice(8,10).join('')}-${hex.slice(10,16).join('')}`;
     }
+
     function calcQuote(){
-        const ci = el.check_in.value; const co = el.check_out.value;
-        if(!ci || !co) throw new Error('Informe Check-in e Check-out.');
-        const n = nights(ci,co);
+      const ci = el.check_in.value; const co = el.check_out.value;
+      if(!ci || !co) throw new Error('Informe Check-in e Check-out.');
+      const n = nights(ci,co);
 
-        const adultos = Number(el.adultos.value||0);
-        const criancas = Number(el.criancas.value||0);
-        const estadia = el.estadia.value;
-        const plano   = (estadia==='Quarto') ? el.plano.value : 'Cafe'; // fallback
+      const adultos = Number(el.adultos.value||0);
+      const criancas = Number(el.criancas.value||0);
+      const estadia = el.estadia.value;
+      const plano   = (estadia==='Quarto') ? el.plano.value : 'Cafe'; // fallback
 
-        // novas regras locais
-        if(criancas >= adultos) throw new Error('O número de crianças deve ser menor que o de adultos.');
-        if(estadia==='Camping' && (adultos+criancas) > 25) throw new Error('Camping comporta até 25 pessoas.');
+      // regras locais
+      if(criancas >= adultos) throw new Error('O número de crianças deve ser menor que o de adultos.');
+      if(estadia==='Camping' && (adultos+criancas) > 25) throw new Error('Camping comporta até 25 pessoas.');
 
-        const ppBill  = peopleBilling(adultos, criancas, estadia);
-        const diaria  = baseRate(estadia, plano);
-        let subtotal  = diaria * ppBill * n;
+      const ppBill  = peopleBilling(adultos, criancas, estadia);
+      const diaria  = baseRate(estadia, plano);
+      let subtotal  = diaria * ppBill * n;
 
-        // Desconto especial somente para "mesmo dia" (2 diárias)
-        let desconto_segunda = 0;
-        if(sameDay(ci,co)){        // n == 2 aqui
-        if(plano === 'Completo')     desconto_segunda = 100;
+      // mesmo dia (2 diárias) → desconto na "segunda diária"
+      let desconto_segunda = 0;
+      if(sameDay(ci,co)){            // n === 2
+        if(plano === 'Completo')       desconto_segunda = 100;
         else if(plano === 'Cafe_Almoco') desconto_segunda = 50;
         else desconto_segunda = 0;
         subtotal -= desconto_segunda;
-        }
+      }
 
-        const pesca = 450 * Number($$('#dias_pesca').value||0) * Number($$('#barcos').value||0);
-        const total = subtotal + pesca;
-        return { noites:n, pessoas:adultos+criancas, diaria, subtotal, pesca, total, desconto_segunda, mesmo_dia:sameDay(ci,co) };
+      const pesca = 450 * Number(el.dias_pesca.value||0) * Number(el.barcos.value||0);
+      const total = subtotal + pesca;
+      return { noites:n, pessoas:adultos+criancas, diaria, subtotal, pesca, total, desconto_segunda, mesmo_dia:sameDay(ci,co) };
     }
 
     function showTotals(t){
-        $$('#t_noites').textContent   = t.noites;
-        $$('#t_pessoas').textContent  = t.pessoas;
-        $$('#t_diaria').textContent   = fmt(t.diaria);
-        $$('#t_subtotal').textContent = fmt(t.subtotal);
-        $$('#t_pescaria').textContent = fmt(t.pesca);
-        $$('#t_total').textContent    = fmt(t.total);
-        el.totalsBox.hidden = false;
+      $$('#t_noites').textContent   = t.noites;
+      $$('#t_pessoas').textContent  = t.pessoas;
+      $$('#t_diaria').textContent   = fmt(t.diaria);
+      $$('#t_subtotal').textContent = fmt(t.subtotal);
+      $$('#t_pescaria').textContent = fmt(t.pesca);
+      $$('#t_total').textContent    = fmt(t.total);
+      el.totalsBox.hidden = false;
     }
 
-    // Se looseDates=true, não dispara algumas validações de required/ordem
+    // Se looseDates=true, evita explodir por ordem das datas durante digitação
     function collectForm({looseDates=false}={}){
-        const f = document.getElementById('bookingForm');
-        const o = Object.fromEntries(new FormData(f).entries());
-        ['adultos','criancas','dias_pesca','barcos'].forEach(k=>o[k]=Number(o[k]||0));
+      const f = document.getElementById('bookingForm');
+      const o = Object.fromEntries(new FormData(f).entries());
+      ['adultos','criancas','dias_pesca','barcos'].forEach(k=>o[k]=Number(o[k]||0));
 
-        if(o.contato==='Email' && !o.email)    throw new Error('E-mail é obrigatório quando a forma de contato é E-mail.');
-        if(o.contato==='WhatsApp' && !o.telefone) throw new Error('Telefone é obrigatório quando a forma de contato é WhatsApp.');
+      if(o.contato==='Email' && !o.email)       throw new Error('E-mail é obrigatório quando a forma de contato é E-mail.');
+      if(o.contato==='WhatsApp' && !o.telefone) throw new Error('Telefone é obrigatório quando a forma de contato é WhatsApp.');
 
-        if(!looseDates){
-        if(new Date(o.check_out) < new Date(o.check_in)){ // mesmo dia permitido (será 2 diárias)
-            throw new Error('Check-out não pode ser antes do Check-in.');
+      if(!looseDates){
+        if(new Date(o.check_out) < new Date(o.check_in)){ // mesmo dia permitido (vira 2 diárias)
+          throw new Error('Check-out não pode ser antes do Check-in.');
         }
         if(o.criancas >= o.adultos) throw new Error('O número de crianças deve ser menor que o de adultos.');
-        }
+      }
 
-        o.status = 'Nao'; // status inicial
-        return o; // backend decide alocação
+      o.status = 'Nao';
+      return o; // backend decide alocação
     }
 
-    // Interações
-    document.getElementById('btnQuote').addEventListener('click', ()=>{
-        try{
-        showTotals(calcQuote());
-        } catch(e){
-        alert(e.message);
-        }
-    });
-      await fetch(CHECK_AVAIL_URL, {
-        method:'POST',
-        headers:{'Content-Type':'application/json','Cache-Control':'no-store'},
-        body: JSON.stringify(payload),
-        cache: 'no-store'
-      });
-    document.getElementById('bookingForm').addEventListener('submit', async (e)=>{
-        e.preventDefault();
-        try{
+    async function onSubmit(e){
+      e.preventDefault();
+      try{
         const payload = collectForm();
         const quote   = calcQuote();
-        const body    = { ...payload, ...{ valor_estimado: quote.total, noites: quote.noites, req_id: generateReqId() } };
+        const body    = { ...payload, valor_estimado: quote.total, noites: quote.noites, req_id: generateReqId() };
 
         const res = await fetch(WEBHOOK_URL,{
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify(body)
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify(body)
         });
 
         if(res.status === 409){
-            const proceed = confirm('Está cheio para o período selecionado. Deseja continuar mesmo assim?');
-            if(!proceed) return;
+          const proceed = confirm('Está cheio para o período selecionado. Deseja continuar mesmo assim?');
+          if(!proceed) return;
         }
 
         const data = await res.json().catch(()=>({}));
         if(res.ok){
-            alert('Reserva enviada com sucesso!\nProtocolo: ' + (data.reserva_id || '—'));
+          alert('Reserva enviada com sucesso!\nProtocolo: ' + (data.reserva_id || '—'));
         } else {
-            alert('Falha ao enviar: ' + (data.error || res.statusText));
+          alert('Falha ao enviar: ' + (data.error || res.statusText));
         }
-        }catch(err){
+      }catch(err){
         alert(err.message);
-        }
-    });
- </script>
+      }
+    }
+  </script>
 </body>
 </html>
