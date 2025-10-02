@@ -166,7 +166,7 @@
     // ======================
     // CONFIGURAÇÃO n8n
     // ======================
-    const WEBHOOK_URL     = "https://n8n.srv1028851.hstgr.cloud/webhook-test/make-booking"; // produção
+    const WEBHOOK_URL     = "https://n8n.srv1028851.hstgr.cloud/webhook/make-booking"; // produção
     const CHECK_AVAIL_URL = "https://n8n.srv1028851.hstgr.cloud/webhook/make-booking";      // verificação leve (mesmo endpoint — retorna 409 se cheio)
 
     // ======================
@@ -211,7 +211,7 @@
         [el.estadia, el.dias_pesca].forEach(n=>n.addEventListener('change', applyVisibilityRules));
         [el.adultos, el.criancas, el.check_in, el.check_out, el.estadia].forEach(n=>n.addEventListener('change', preblockCalendar));
     });
-
+    
     function nights(ci, co){
         const a = new Date(ci); const b = new Date(co);
         const diff = Math.round((b - a) / (1000*60*60*24));
@@ -294,7 +294,15 @@
         el.check_out.setCustomValidity('');
         }
     }
-
+    function generateReqId() {
+      // UUID v4-like
+      const b = new Uint8Array(16);
+      crypto.getRandomValues(b);
+      b[6] = (b[6] & 0x0f) | 0x40; // version
+      b[8] = (b[8] & 0x3f) | 0x80; // variant
+      const hex = [...b].map(x=>x.toString(16).padStart(2,'0'));
+      return `${hex.slice(0,4).join('')}-${hex.slice(4,6).join('')}-${hex.slice(6,8).join('')}-${hex.slice(8,10).join('')}-${hex.slice(10,16).join('')}`;
+    }
     function calcQuote(){
         const ci = el.check_in.value; const co = el.check_out.value;
         if(!ci || !co) throw new Error('Informe Check-in e Check-out.');
@@ -365,13 +373,18 @@
         alert(e.message);
         }
     });
-
+      await fetch(CHECK_AVAIL_URL, {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Cache-Control':'no-store'},
+        body: JSON.stringify(payload),
+        cache: 'no-store'
+      });
     document.getElementById('bookingForm').addEventListener('submit', async (e)=>{
         e.preventDefault();
         try{
         const payload = collectForm();
         const quote   = calcQuote();
-        const body    = { ...payload, ...{ valor_estimado: quote.total, noites: quote.noites, desconto_segunda: quote.desconto_segunda, mesmo_dia: quote.mesmo_dia } };
+        const body    = { ...payload, ...{ valor_estimado: quote.total, noites: quote.noites, req_id: generateReqId() } };
 
         const res = await fetch(WEBHOOK_URL,{
             method:'POST',
