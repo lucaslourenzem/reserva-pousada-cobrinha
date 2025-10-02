@@ -4,16 +4,23 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Seja Bem‑Vindo Pescador! · Pousada do Cobrinha</title>
+ 
+ 
   <style>
     :root{--bg:#f7f2e7;--ink:#2d2a26;--accent:#1e6f5c;--accent-2:#b87333;--wood:#7a5230;--muted:#6a5f55;--error:#b00020;--ok:#1b5e20}
     html,body{background:var(--bg);color:var(--ink);font-family: ui-serif, Georgia, "Times New Roman", Times, serif}
-    .wrap{max-width:980px;margin:24px auto;padding:24px}
+    .wrap{max-width:820px;margin:32px auto;padding:24px} /* ↓ mais compacto e centralizado */
     .card{background:linear-gradient(180deg,#fff8ee,#f7efdf);border:2px solid var(--wood);box-shadow:0 6px 0 var(--wood),0 10px 20px rgba(0,0,0,.08);border-radius:18px;padding:24px}
-    header{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+    header{display:flex;align-items:center;gap:16px;margin-bottom:16px;justify-content:center;text-align:center}
     header img{width:70px;height:70px;object-fit:contain;border-radius:50%;border:2px solid var(--accent-2);background:#fff}
     h1{font-size:clamp(22px,3.8vw,36px);margin:0;color:var(--wood);letter-spacing:.03em}
     .subtitle{color:var(--muted);margin-top:4px}
-    form{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-top:14px}
+
+    /* grid centralizado, largura confortável */
+    form{
+        display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin-top:14px;
+        align-items:start;justify-items:stretch
+    }
     .field{display:flex;flex-direction:column;gap:6px}
     .field label{font-weight:700;color:var(--wood)}
     .field input,.field select,.field textarea{padding:10px 12px;border:2px solid var(--wood);border-radius:12px;background:#fff;font-size:15px;outline:none;transition:box-shadow .15s ease,border-color .15s ease}
@@ -21,16 +28,16 @@
     .col-6{grid-column:span 6}.col-4{grid-column:span 4}.col-3{grid-column:span 3}.col-2{grid-column:span 2}.col-12{grid-column:1/-1}
     .hint{font-size:12px;color:var(--muted)}
     .pill{display:inline-block;padding:6px 10px;border:2px dashed var(--accent-2);border-radius:999px;color:var(--accent-2);background:#fff8f0;font-weight:700}
-    .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+    .btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;justify-content:center}
     button{cursor:pointer;border:none;border-radius:12px;padding:12px 16px;font-weight:800;letter-spacing:.02em}
     .btn-primary{background:var(--accent);color:#fff}.btn-secondary{background:var(--accent-2);color:#fff}.btn-outline{background:#fff;border:2px solid var(--wood);color:var(--wood)}
     .notice{border-left:6px solid var(--accent-2);background:#fff7ef;padding:12px;border-radius:12px}
     .error{color:var(--error)}.ok{color:var(--ok)}
     .totals{background:#fff;border:2px solid var(--wood);border-radius:16px;padding:14px}
-    .totals h3{margin-top:0}
+    .totals h3{margin-top:0;text-align:center}
     .totals dl{display:grid;grid-template-columns:1fr auto;gap:8px;font-variant-numeric:tabular-nums}
     .totals dt{color:var(--muted)}.totals dd{margin:0;font-weight:800}
-    footer{margin-top:18px;color:var(--muted);font-size:12px}
+    footer{margin-top:18px;color:var(--muted);font-size:12px;text-align:center}
     @media(max-width:780px){.col-6,.col-4,.col-3,.col-2{grid-column:1/-1}}
   </style>
 </head>
@@ -127,10 +134,8 @@
         </div>
 
         <div class="col-12 notice"><b>Acomodação</b> Com base no total de pessoas e na disponibilidade:Entre 1 Casa (com 2 Suítes), 2 Apartamentos e 3 Suítes (capacidade sugerida: até 28 pessoas). Grupos maiores → entre em contato conosco.</div>
-
         <div class="col-12 btns">
-          <button class="btn-secondary" type="button" id="btnAvailability">Verificar Disponibilidade</button>
-          <button class="btn-primary" type="button" id="btnQuote">Calcular Orçamento</button>
+            <button class="btn-primary" type="button" id="btnQuote">Calcular Orçamento</button>
         </div>
         <div id="availabilityMsg" class="hint" style="margin-top:6px"></div>
 
@@ -156,156 +161,239 @@
       <footer>© <span id="year"></span> Pousada do Cobrinha · Layout do pescador 🎣</footer>
     </div>
   </div>
-
+ 
   <script>
     // ======================
     // CONFIGURAÇÃO n8n
     // ======================
     const WEBHOOK_URL     = "https://n8n.srv1028851.hstgr.cloud/webhook-test/make-booking"; // produção
-    const CHECK_AVAIL_URL = "https://n8n.srv1028851.hstgr.cloud/webhook/make-booking"; // implemente no n8n
+    const CHECK_AVAIL_URL = "https://n8n.srv1028851.hstgr.cloud/webhook/make-booking";      // verificação leve (mesmo endpoint — retorna 409 se cheio)
 
     // ======================
     // UTILITÁRIOS
     // ======================
-    const $$ = sel => document.querySelector(sel);
-    const fmtBRL = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    const $$  = sel => document.querySelector(sel);
+    const fmt = v  => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
     const todayISO = () => new Date().toISOString().slice(0,10);
-    const addDays = (d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)};
+    const addDays  = (d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)};
 
+    // campos
+    const el = {
+        estadia:      null,
+        plano:        null,
+        dias_pesca:   null,
+        barcos:       null,
+        adultos:      null,
+        criancas:     null,
+        check_in:     null,
+        check_out:    null,
+        totalsBox:    null,
+    };
 
-    window.addEventListener('DOMContentLoaded',()=>{
-      $$('#check_in').value = addDays(todayISO(), 10);
-      $$('#check_out').value = addDays(todayISO(), 14);
-      $$('#email').value = 'lucas@example.com';
-      document.getElementById('year').textContent = new Date().getFullYear();
+    window.addEventListener('DOMContentLoaded', ()=>{
+        el.estadia    = $$('#estadia');
+        el.plano      = $$('#plano_refeicao');
+        el.dias_pesca = $$('#dias_pesca');
+        el.barcos     = $$('#barcos');
+        el.adultos    = $$('#adultos');
+        el.criancas   = $$('#criancas');
+        el.check_in   = $$('#check_in');
+        el.check_out  = $$('#check_out');
+        el.totalsBox  = $$('#totalsBox');
+
+        // defaults
+        el.check_in.value  = addDays(todayISO(), 10);
+        el.check_out.value = addDays(todayISO(), 14);
+        $$('#email').value = 'lucas@example.com';
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        applyVisibilityRules();
+        [el.estadia, el.dias_pesca].forEach(n=>n.addEventListener('change', applyVisibilityRules));
+        [el.adultos, el.criancas, el.check_in, el.check_out, el.estadia].forEach(n=>n.addEventListener('change', preblockCalendar));
     });
 
-
     function nights(ci, co){
-      const a = new Date(ci); const b = new Date(co);
-      const diff = (b - a) / (1000*60*60*24);
-      return Math.max(0, Math.round(diff));
+        const a = new Date(ci); const b = new Date(co);
+        const diff = Math.round((b - a) / (1000*60*60*24));
+        // regra especial: mesmo dia = 2 diárias
+        return diff <= 0 ? 2 : diff;
     }
 
+    function sameDay(ci, co){
+        const a = new Date(ci); const b = new Date(co);
+        return a.toDateString() === b.toDateString();
+    }
 
     function peopleAllocation(adultos, criancas){
-      return Number(adultos||0) + Number(criancas||0); // alocação
+        return Number(adultos||0) + Number(criancas||0);
     }
     function peopleBilling(adultos, criancas, estadia){
-      // valor: quarto (criança=0.5), camping (criança=1)
-      if(estadia === 'Camping') return Number(adultos||0) + Number(criancas||0);
-      return Number(adultos||0) + 0.5*Number(criancas||0);
+        // valor: quarto (criança=0.5), camping (criança=1)
+        if(estadia === 'Camping') return Number(adultos||0) + Number(criancas||0);
+        return Number(adultos||0) + 0.5*Number(criancas||0);
     }
     function baseRate(estadia, plano){
-      if(estadia === 'Camping') return 80; // por pessoa/dia (adultos e crianças)
-      const map = { 'Cafe':250, 'Cafe_Almoco':300, 'Completo':350 };
-      return map[plano] ?? 250;
+        if(estadia === 'Camping') return 80; // por pessoa/dia (adultos e crianças)
+        const map = { 'Cafe':250, 'Cafe_Almoco':300, 'Completo':350 };
+        return map[plano] ?? 250;
     }
 
+    // Mostra/oculta campos conforme lógica de negócio
+    function applyVisibilityRules(){
+        const isQuarto   = el.estadia.value === 'Quarto';
+        const pescaOn    = Number(el.dias_pesca.value||0) > 0;
 
-    async function checkAvailability(){
-      const payload = collectForm();
-      setAvailability('Verificando disponibilidade…');
-      try{
-        if(CHECK_AVAIL_URL.startsWith('https://lucaslourenzem.github.io/reserva-pousada-cobrinha/')){
-          await new Promise(r=>setTimeout(r,600));
-          setAvailability('Exemplo: disponibilidade OK (configure CHECK_AVAIL_URL no n8n).','ok');
-          return { available:true };
+        // Plano de Refeição só existe em Quarto
+        toggleField('#plano_refeicao', isQuarto);
+
+        // Barcos aparece só se tiver ao menos 1 dia de pesca
+        toggleField('#barcos', pescaOn);
+    }
+
+    function toggleField(selector, show){
+        const field = document.querySelector(selector)?.closest('.field');
+        if(!field) return;
+        field.style.display = show ? '' : 'none';
+        // também limpa valor quando oculta
+        if(!show){
+        const inp = field.querySelector('input,select,textarea');
+        if(inp) { if(inp.tagName==='SELECT') inp.selectedIndex=0; else inp.value = (inp.type==='number' ? 0 : ''); }
         }
-        const res = await fetch(CHECK_AVAIL_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-        const data = await res.json();
-        setAvailability(data.available? 'Disponível ✅':'Indisponível ❌', data.available?'ok':'error');
-        return data;
-      }catch(err){ setAvailability('Erro ao verificar disponibilidade.','error'); return {available:false,error:String(err)} }
-    }
-    function setAvailability(msg,type){ const el=$$('#availabilityMsg'); el.textContent=msg; el.classList.remove('error','ok'); if(type==='ok')el.classList.add('ok'); if(type==='error')el.classList.add('error'); }
-
-    function calcQuote(){
-      const ci = $$('#check_in').value; const co = $$('#check_out').value;
-      const n = nights(ci,co); if(n<=0) throw new Error('Datas inválidas: check-out deve ser após o check-in.');
-      const adultos = Number($$('#adultos').value||0);
-      const criancas = Number($$('#criancas').value||0);
-      const estadia = $$('#estadia').value;
-      const plano = $$('#plano_refeicao').value;
-
-
-      const totalAlloc = peopleAllocation(adultos, criancas);
-      if(estadia==='Quarto' && totalAlloc>28){
-        throw new Error('Para grupos acima de 28 pessoas em Quarto, entre em contato por WhatsApp/E-mail.');
-      }
-
-
-      const ppBill = peopleBilling(adultos, criancas, estadia);
-      const diaria = baseRate(estadia, plano);
-      const subtotal = diaria * ppBill * n;
-      const pesca = 450 * Number($$('#dias_pesca').value||0) * Number($$('#barcos').value||0);
-      const total = subtotal + pesca;
-      return { noites:n, pessoas:totalAlloc, diaria, subtotal, pesca, total };
     }
 
-
-    function showTotals(t){
-      $$('#t_noites').textContent = t.noites;
-      $$('#t_pessoas').textContent = t.pessoas;
-      $$('#t_diaria').textContent = fmtBRL(t.diaria);
-      $$('#t_subtotal').textContent = fmtBRL(t.subtotal);
-      $$('#t_pescaria').textContent = fmtBRL(t.pesca);
-      $$('#t_total').textContent = fmtBRL(t.total);
-      $$('#totalsBox').hidden = false;
-    }
-
-
-    function collectForm(){
-      const f = document.getElementById('bookingForm');
-      const o = Object.fromEntries(new FormData(f).entries());
-      ['adultos','criancas','dias_pesca','barcos'].forEach(k=>o[k]=Number(o[k]||0));
-      if(o.contato==='Email' && !o.email) throw new Error('E-mail é obrigatório quando a forma de contato é E-mail.');
-      if(o.contato==='WhatsApp' && !o.telefone) throw new Error('Telefone é obrigatório quando a forma de contato é WhatsApp.');
-      if(new Date(o.check_out) <= new Date(o.check_in)) throw new Error('Check-out deve ser após o check-in.');
-      const total = peopleAllocation(o.adultos,o.criancas);
-      if(o.estadia==='Quarto' && total>28){ throw new Error('Para grupos acima de 28 pessoas em Quarto, contate a pousada.'); }
-      o.status = 'Nao'; // status inicial
-      return o; // sem "acomodacao" — backend decide
-    }
-
-
-    document.getElementById('btnAvailability').addEventListener('click', checkAvailability);
-    document.getElementById('btnQuote').addEventListener('click', ()=>{ try{ showTotals(calcQuote()); setAvailability(''); } catch(e){ alert(e.message); }});
-
-
-    document.getElementById('bookingForm').addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      try{
-        const payload = collectForm();
-        const quote = calcQuote();
-        const body = { ...payload, ...{ valor_estimado: quote.total, noites: quote.noites } };
-        if(WEBHOOK_URL.startsWith('https://SEU_HOST')){
-          alert('Configure WEBHOOK_URL para enviar ao n8n. Simulação concluída.');
-          return;
+    // Pré-bloqueio do calendário (front): se a data + pessoas não passam no back, marcamos inválido
+    async function preblockCalendar(){
+        try{
+        const payload = collectForm({looseDates:true}); // não explode se datas ainda não válidas
+        // Regras simples locais (sem depender do back)
+        const total = peopleAllocation(payload.adultos, payload.criancas);
+        if(payload.estadia==='Camping' && total>25){
+            el.check_in.setCustomValidity('Camping comporta até 25 pessoas. Ajuste o grupo.');
+            el.check_in.reportValidity();
+            return;
         }
 
-        const res = await fetch(WEBHOOK_URL,{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify(body)
+        // Consulta leve ao endpoint – o seu próprio back dá o veredito final
+        const res = await fetch(CHECK_AVAIL_URL,{
+            method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)
         });
 
-        // ⚠️ Tratamento especial para erro 409 (conflito de reserva)
         if(res.status === 409){
-          const proceed = confirm('Está cheio para o período selecionado. Deseja continuar mesmo assim?');
-          if(!proceed) return; // usuário cancelou
+            // marca a data atual como inválida (usuário precisará mudar)
+            const msg = 'Período indisponível para a quantidade de pessoas selecionada.';
+            el.check_in.setCustomValidity(msg);
+            el.check_out.setCustomValidity(msg);
+            el.check_in.reportValidity();
+        } else {
+            el.check_in.setCustomValidity('');
+            el.check_out.setCustomValidity('');
+        }
+        } catch(e){
+        // não trava o usuário por erro transitório
+        el.check_in.setCustomValidity('');
+        el.check_out.setCustomValidity('');
+        }
+    }
+
+    function calcQuote(){
+        const ci = el.check_in.value; const co = el.check_out.value;
+        if(!ci || !co) throw new Error('Informe Check-in e Check-out.');
+        const n = nights(ci,co);
+
+        const adultos = Number(el.adultos.value||0);
+        const criancas = Number(el.criancas.value||0);
+        const estadia = el.estadia.value;
+        const plano   = (estadia==='Quarto') ? el.plano.value : 'Cafe'; // fallback
+
+        // novas regras locais
+        if(criancas >= adultos) throw new Error('O número de crianças deve ser menor que o de adultos.');
+        if(estadia==='Camping' && (adultos+criancas) > 25) throw new Error('Camping comporta até 25 pessoas.');
+
+        const ppBill  = peopleBilling(adultos, criancas, estadia);
+        const diaria  = baseRate(estadia, plano);
+        let subtotal  = diaria * ppBill * n;
+
+        // Desconto especial somente para "mesmo dia" (2 diárias)
+        let desconto_segunda = 0;
+        if(sameDay(ci,co)){        // n == 2 aqui
+        if(plano === 'Completo')     desconto_segunda = 100;
+        else if(plano === 'Cafe_Almoco') desconto_segunda = 50;
+        else desconto_segunda = 0;
+        subtotal -= desconto_segunda;
+        }
+
+        const pesca = 450 * Number($$('#dias_pesca').value||0) * Number($$('#barcos').value||0);
+        const total = subtotal + pesca;
+        return { noites:n, pessoas:adultos+criancas, diaria, subtotal, pesca, total, desconto_segunda, mesmo_dia:sameDay(ci,co) };
+    }
+
+    function showTotals(t){
+        $$('#t_noites').textContent   = t.noites;
+        $$('#t_pessoas').textContent  = t.pessoas;
+        $$('#t_diaria').textContent   = fmt(t.diaria);
+        $$('#t_subtotal').textContent = fmt(t.subtotal);
+        $$('#t_pescaria').textContent = fmt(t.pesca);
+        $$('#t_total').textContent    = fmt(t.total);
+        el.totalsBox.hidden = false;
+    }
+
+    // Se looseDates=true, não dispara algumas validações de required/ordem
+    function collectForm({looseDates=false}={}){
+        const f = document.getElementById('bookingForm');
+        const o = Object.fromEntries(new FormData(f).entries());
+        ['adultos','criancas','dias_pesca','barcos'].forEach(k=>o[k]=Number(o[k]||0));
+
+        if(o.contato==='Email' && !o.email)    throw new Error('E-mail é obrigatório quando a forma de contato é E-mail.');
+        if(o.contato==='WhatsApp' && !o.telefone) throw new Error('Telefone é obrigatório quando a forma de contato é WhatsApp.');
+
+        if(!looseDates){
+        if(new Date(o.check_out) < new Date(o.check_in)){ // mesmo dia permitido (será 2 diárias)
+            throw new Error('Check-out não pode ser antes do Check-in.');
+        }
+        if(o.criancas >= o.adultos) throw new Error('O número de crianças deve ser menor que o de adultos.');
+        }
+
+        o.status = 'Nao'; // status inicial
+        return o; // backend decide alocação
+    }
+
+    // Interações
+    document.getElementById('btnQuote').addEventListener('click', ()=>{
+        try{
+        showTotals(calcQuote());
+        } catch(e){
+        alert(e.message);
+        }
+    });
+
+    document.getElementById('bookingForm').addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        try{
+        const payload = collectForm();
+        const quote   = calcQuote();
+        const body    = { ...payload, ...{ valor_estimado: quote.total, noites: quote.noites, desconto_segunda: quote.desconto_segunda, mesmo_dia: quote.mesmo_dia } };
+
+        const res = await fetch(WEBHOOK_URL,{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify(body)
+        });
+
+        if(res.status === 409){
+            const proceed = confirm('Está cheio para o período selecionado. Deseja continuar mesmo assim?');
+            if(!proceed) return;
         }
 
         const data = await res.json().catch(()=>({}));
         if(res.ok){
-          alert('Reserva enviada com sucesso!\nProtocolo: ' + (data.reserva_id || '—'));
+            alert('Reserva enviada com sucesso!\nProtocolo: ' + (data.reserva_id || '—'));
         } else {
-          alert('Falha ao enviar: ' + (data.error || res.statusText));
+            alert('Falha ao enviar: ' + (data.error || res.statusText));
         }
-      }catch(err){
+        }catch(err){
         alert(err.message);
-      }
+        }
     });
-  </script>
+ </script>
 </body>
 </html>
